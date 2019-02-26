@@ -72,8 +72,6 @@ public class GameClicker implements ActionListener,  KeyListener {
 	
 	//////////upgrades
 	private JScrollPane scroll;
-	int w = 275;
-	int h = 35;
 	int total = 8;
 	String[] namesUpg = {"Slaves", "CPU", "Notebooks", "High-tech", "Ads", "Monitor", "President help", "Nukes", "GPU morele.pl"};
 	ArrayList<Building> buildings = new ArrayList<Building>();
@@ -114,9 +112,9 @@ public class GameClicker implements ActionListener,  KeyListener {
 
 
 	public GameClicker() throws IOException {
+		tab();
 		data();
 		initialize();
-		tab();
 		adding();
 
 	}
@@ -136,32 +134,30 @@ public class GameClicker implements ActionListener,  KeyListener {
 	}
 	
 	private void tab() {
-		int spc = 40;
-		int y = 140;
-		
+	
 		/////upgrades
 		for(int i = 0; i <= total; i++) {
-			buildings.add(new Building(namesUpg[i], 5, (y+=spc), w, h, i+1, 1));	
+			buildings.add(new Building(namesUpg[i], i+1, 1));	
 			upg.add(buildings.get(i));
 			buildings.get(i).buy.addActionListener(new ButtonListener(i));
 		}	
 		
 		
 		///////perks
-		for(int i = 0; i < 4; i++) {
+		for(int i = 0; i <= 3; i++) {
 			timerArray.add(new Timer());
-			perksArray.add(new Building(namesPerks[i], 5, (y+=spc), w, h, i+1, (i+1)*4));	
+			perksArray.add(new Building(namesPerks[i], i+1, (i+1)*4));	
 			perks.add(perksArray.get(i));
 			perksArray.get(i).buy.addActionListener(new ButtonListenerPerks(i));
 		}
 		
 		
 		//////stats
-		for(int i = 0; i < 2; i++) {
-			statsArray.add(new Building(stats[i], 5, (y+=spc), w, h, i+1, (i+1)*4));
-			statsArray.get(i).nameLabel.setText(stats[i]);
-			statsArray.get(i).buy.setVisible(false);
-			settings.add(statsArray.get(i));	
+		for(int k = 0; k < 2; k++) {
+			statsArray.add(new Building(stats[k], k+1, (k+1)*4));
+			statsArray.get(k).nameLabel.setText(stats[k]);
+			statsArray.get(k).buy.setVisible(false);
+			settings.add(statsArray.get(k));	
 		}	
 		statsArray.get(0).amountLabel.setText(counter+ " clicks");
 		statsArray.get(1).amountLabel.setText(spentMoney+" $");
@@ -235,7 +231,7 @@ public class GameClicker implements ActionListener,  KeyListener {
 		perks.setLayout(new GridLayout(perksArray.size(), 1, 0, 10));
 		scroll2 = new JScrollPane(perks, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
-		settings.setLayout(new GridLayout(statsArray.size(), 1, 0, 10));
+		settings.setLayout(new GridLayout(statsArray.size()+2, 1, 0, 10));
 		scroll3 = new JScrollPane(settings, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
 		menu.add("upgrades", scroll);
@@ -294,7 +290,7 @@ public class GameClicker implements ActionListener,  KeyListener {
 				t.schedule(new TimerTask() {
 					@Override
 					public void run() {
-						money += secOff-1;
+						money += secOff;
 						amountMoney.setText(money + " $");
 						
 					}
@@ -337,7 +333,7 @@ public class GameClicker implements ActionListener,  KeyListener {
 			String line = null;	
 	
 			while((line = br.readLine())!= null) {
-				String[] lines = line.split(";", -1);
+				String[] lines = line.split(";");
 				in.add(lines);
 
 			}	
@@ -349,16 +345,30 @@ public class GameClicker implements ActionListener,  KeyListener {
 			  secOff = Integer.valueOf(basicReader[2]); 
 			  counter = Integer.valueOf(basicReader[3]);
 		      spentMoney = Integer.valueOf(basicReader[4]);
-			
-		      for(int i=0; i<buildings.size();i++) {
-		    	  String[] upgReader = in.get(1);
-		    	  buildings.get(i).amount = Integer.valueOf(upgReader[i]);
-		      }
-		      for(int i=0; i<buildings.size();i++) {
-		    	  String[] perksReader = in.get(1);
-		    	  buildings.get(i).amount = Integer.valueOf(perksReader[i]);
-		      }
 		      
+		      String[] secondLine = in.get(1);
+		      int g = 0;
+		     for(int i = 0; i < secondLine.length; i++) {
+		    	 if(i < 9) {
+			    	 Building b = buildings.get(i);
+			    	 b.amount = Integer.valueOf(secondLine[i]);
+			    	 b.calculatePrice();
+			    	 b.nameLabel.setText(b.name+": "+b.amount);
+			    	 b.amountLabel.setText(b.price +" $");
+			    	 if(b.amount > 0) off += (b.amount * b.lvl);
+			    	 
+		    	 } else if(i >= 9) { 
+		    		 Building b = perksArray.get(g);
+			    	 b.amount = Integer.valueOf(secondLine[i]);
+			    	 b.calculatePrice();
+			    	 b.nameLabel.setText(b.name+": "+b.amount);
+			    	 b.amountLabel.setText(b.price +" $");
+			    	 if(b.amount > 0) off += (b.amount * (b.lvl*2)-1);
+
+			    	 g++;
+		    	 }
+		    	 
+		     }		      
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -381,9 +391,7 @@ public class GameClicker implements ActionListener,  KeyListener {
 					
 					for(int i=0; i<buildings.size();i++) {
 						saver.print(buildings.get(i).amount+";");
-					}
-					saver.println("\n");
-					
+					}	
 					for(int i=0; i<perksArray.size();i++) {
 						saver.print(perksArray.get(i).amount+";");
 					}

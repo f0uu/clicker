@@ -31,12 +31,12 @@ public class Building extends JPanel {
 	JButton buy;
 	GridBagConstraints frameConstraints = new GridBagConstraints();
 	
-	Building(String name_, int x_, int y_, int w_, int h_, int lvl_, int power_) {
+	Building(String name_, int lvl_, int power_) {
 		name = name_;
-		x = x_;
-		y = y_;
-		w = w_;
-		h = h_;
+//		x = x_;
+//		y = y_;
+//		w = w_;
+//		h = h_;
 		lvl = lvl_+1;
 		power = power_;
 		calculatePrice();
